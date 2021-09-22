@@ -1,4 +1,5 @@
 import os
+import math
 import torch
 import torch.nn
 import torch.optim
@@ -161,8 +162,19 @@ class Solver:
     elif flags.lr_type == 'cos':
       self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
           self.optimizer, flags.max_epoch, eta_min=0.001)
+    elif flags.lr_type == 'cos_warmup':
+      def cos_warmup(epoch):
+        warmup = flags.warmp_epoch
+        if epoch <= warmup:
+          return epoch / warmup
+        else:
+          ratio = (epoch - warmup) / (flags.max_epoch - warmup)
+          return 0.001 + 0.4995 * (1 + math.cos(math.pi * ratio))
+      self.scheduler = torch.optim.lr_scheduler.LambdaLR(
+          self.optimizer, cos_warmup)
     elif flags.lr_type == 'poly':
-      def poly(epoch): return (1 - epoch / flags.max_epoch) ** flags.lr_power
+      def poly(epoch):
+        return (1 - epoch / flags.max_epoch) ** flags.lr_power
       self.scheduler = torch.optim.lr_scheduler.LambdaLR(
           self.optimizer, poly)
     elif flags.lr_type == 'constant':

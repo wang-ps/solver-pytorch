@@ -133,7 +133,7 @@ def _update_config(FLAGS, args):
   alias = FLAGS.SOLVER.alias.lower()
   if 'time' in alias:  # 'time' is a special keyword
     alias = alias.replace('time', datetime.now().strftime('%m%d%H%M')) #%S
-  if alias is not '':
+  if alias != '':
     FLAGS.SOLVER.logdir += '_' + alias
   FLAGS.freeze()
 
